@@ -19,7 +19,7 @@ export default function PartySamples() {
     "Ash Content"
   ];
 
-  // Load Party Name
+  // LOAD PARTY + SAMPLES
   useEffect(() => {
     const storedParties = JSON.parse(localStorage.getItem("parties")) || [];
 
@@ -34,26 +34,21 @@ export default function PartySamples() {
 
     setPartyName(foundParty.name);
 
-    // Dummy previous samples
-    const dummySamples = [
-      {
-        id: 1,
-        name: "Sample bs",
-        date: "3/1/2026",
-        tests: ["Proximate Analysis", "Ultimate Analysis", "GCV Test"]
-      },
-      {
-        id: 2,
-        name: "Coal Sample A",
-        date: "01/02/2026",
-        tests: ["Moisture Test", "Ash Content"]
-      }
-    ];
+    const storedSamples =
+      JSON.parse(localStorage.getItem(`samples_${partyId}`)) || [];
 
-    setSamples(dummySamples);
+    setSamples(storedSamples);
   }, [partyId, navigate]);
 
-  // Add Sample
+  // SAVE SAMPLES whenever updated
+  useEffect(() => {
+    localStorage.setItem(
+      `samples_${partyId}`,
+      JSON.stringify(samples)
+    );
+  }, [samples, partyId]);
+
+  // ADD SAMPLE
   const addSample = () => {
     if (!sampleName.trim() || selectedTests.length === 0) {
       alert("Enter sample name and select tests");
@@ -72,12 +67,13 @@ export default function PartySamples() {
     setSelectedTests([]);
   };
 
-  // Delete Sample
+  // DELETE SAMPLE
   const deleteSample = (id) => {
+    if (!window.confirm("Delete this sample?")) return;
     setSamples(samples.filter((s) => s.id !== id));
   };
 
-  // Search + Sort
+  // FILTER + SORT
   const filteredSamples = [...samples]
     .filter((s) =>
       s.name.toLowerCase().includes(search.toLowerCase())
@@ -192,24 +188,37 @@ export default function PartySamples() {
           <p>No samples found.</p>
         ) : (
           filteredSamples.map((sample) => (
-            <div key={sample.id} style={{
-              border: "1px solid #ddd",
-              padding: 15,
-              borderRadius: 8,
-              marginBottom: 15,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              background: "#fafafa"
-            }}>
-              <div>
+            <div
+              key={sample.id}
+              style={{
+                border: "1px solid #ddd",
+                padding: 15,
+                borderRadius: 8,
+                marginBottom: 15,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                background: "#fafafa"
+              }}
+            >
+              {/* CLICKABLE AREA */}
+              <div
+                onClick={() =>
+                  navigate(`/sample/${partyId}/${sample.id}`)
+                }
+                style={{ cursor: "pointer", flex: 1 }}
+              >
                 <strong>{sample.name}</strong>
                 <div>Date: {sample.date}</div>
                 <div>Tests: {sample.tests.join(", ")}</div>
               </div>
 
+              {/* DELETE BUTTON */}
               <button
-                onClick={() => deleteSample(sample.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteSample(sample.id);
+                }}
                 style={{
                   padding: "8px 14px",
                   background: "#d9534f",
