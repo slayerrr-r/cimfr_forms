@@ -14,25 +14,19 @@ export default function SulphurSection({ data, setData }) {
   };
 
   return (
-    <div
-      style={{
-        background: "white",
-        padding: 20,
-        marginTop: 30,
-        borderRadius: 8,
-        border: "1px solid #ddd",
-        overflowX: "auto"
-      }}
-    >
-      <h2>4. Distribution of Sulphur</h2>
 
-      <table style={{ minWidth: 500, borderCollapse: "collapse" }}>
-        <thead>
+    <div className="table-responsive">
+
+      <table className="table table-bordered align-middle">
+
+        <thead className="table-light">
+
           <tr>
-            <th>Type</th>
+            <th style={{ width: "40%" }}>Type</th>
             <th>Coal Basis (%)</th>
             <th>Sulphur Basis (%)</th>
           </tr>
+
         </thead>
 
         <tbody>
@@ -62,19 +56,29 @@ export default function SulphurSection({ data, setData }) {
           />
 
         </tbody>
+
       </table>
+
     </div>
   );
 }
 
+
+
 function Row({ label, coal, sulphur, onCoal, onSulphur }) {
+
   return (
+
     <tr>
-      <td>{label}</td>
+
+      <td className="fw-semibold">
+        {label}
+      </td>
 
       <td>
         <input
           type="number"
+          className="form-control form-control-sm"
           value={coal}
           onChange={(e)=>onCoal(e.target.value)}
         />
@@ -83,10 +87,13 @@ function Row({ label, coal, sulphur, onCoal, onSulphur }) {
       <td>
         <input
           type="number"
+          className="form-control form-control-sm"
           value={sulphur}
           onChange={(e)=>onSulphur(e.target.value)}
         />
       </td>
+
     </tr>
+
   );
 }

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/logo.jpg";
 
 export default function PartyDashboard() {
+
   const navigate = useNavigate();
 
   const DUMMY_PARTIES = [
@@ -13,10 +13,10 @@ export default function PartyDashboard() {
     { id: 5, name: "Hindustan Zinc", contact: "9111222333", email: "hzl@gmail.com" },
   ];
 
-  // LOAD FROM LOCAL STORAGE ONLY ON FIRST RENDER
   const [parties, setParties] = useState(() => {
     const saved = localStorage.getItem("parties");
     if (!saved) return DUMMY_PARTIES;
+
     try {
       const parsed = JSON.parse(saved);
       return parsed.length ? parsed : DUMMY_PARTIES;
@@ -30,12 +30,12 @@ export default function PartyDashboard() {
   const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
 
-  // SAVE whenever parties change
   React.useEffect(() => {
     localStorage.setItem("parties", JSON.stringify(parties));
   }, [parties]);
 
   const addParty = () => {
+
     if (!name.trim() || !contact.trim() || !email.trim()) {
       alert("Please fill all fields");
       return;
@@ -49,13 +49,16 @@ export default function PartyDashboard() {
     };
 
     setParties([newParty, ...parties]);
+
     setName("");
     setContact("");
     setEmail("");
   };
 
   const deleteParty = (id) => {
+
     if (!window.confirm("Delete this party?")) return;
+
     setParties(parties.filter((p) => p.id !== id));
   };
 
@@ -63,129 +66,183 @@ export default function PartyDashboard() {
     navigate(`/party/${party.id}`);
   };
 
-  // ✅ FILTER parties based on search
   const filteredParties = parties.filter((party) =>
     party.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const highlight = (text) => {
-    if (!search) return text;
-
-    const index = text.toLowerCase().indexOf(search.toLowerCase());
-    if (index === -1) return text;
-
-    return (
-      <>
-        {text.substring(0, index)}
-        <span style={{ backgroundColor: "yellow" }}>
-          {text.substring(index, index + search.length)}
-        </span>
-        {text.substring(index + search.length)}
-      </>
-    );
-  };
-
   return (
-    <div style={styles.wrapper}>
-      
-      <div style={styles.header}>
-        <img src={logo} alt="logo" style={styles.logo} />
+
+    <div className="container-fluid">
+
+      {/* PAGE HEADER */}
+
+      <div className="d-flex justify-content-between align-items-center mb-4">
+
         <div>
-          <div style={styles.hindi}>
-            सी.एस.आई.आर. केन्द्रीय खनन एवं ईंधन अनुसंधान संस्थान, नागपुर
-          </div>
-          <div style={styles.eng}>
-            CIMFR - CENTRAL INSTITUTE OF MINING AND FUEL RESEARCH
-          </div>
-          <div style={styles.sub}>
-            NAGPUR RESEARCH CENTRAL (FUEL SCIENCE)
-          </div>
+          <h2 className="fw-bold mb-1">
+            Party Management
+          </h2>
+
+          <p className="text-muted mb-0">
+            Manage laboratory clients and their sample records
+          </p>
         </div>
+
       </div>
 
-      <h1 style={styles.mainTitle}>Party Management</h1>
-      <p style={styles.desc}>
-        Add new parties and click on a party to open sample management.
-      </p>
 
-      <div style={styles.card}>
-        <h3 style={styles.cardTitle}>Add New Party</h3>
 
-        <div style={styles.formRow}>
-          <label style={styles.label}>Party Name</label>
-          <input style={styles.input} value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
+      {/* ADD PARTY */}
 
-        <div style={styles.formRow}>
-          <label style={styles.label}>Contact Number</label>
-          <input style={styles.input} value={contact} onChange={(e) => setContact(e.target.value)} />
-        </div>
+      <div className="card shadow-sm border-0 mb-4">
 
-        <div style={styles.formRow}>
-          <label style={styles.label}>Email</label>
-          <input style={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
+        <div className="card-body">
 
-        <button style={styles.addBtn} onClick={addParty}>
-          + Add Party
-        </button>
-      </div>
+          <h5 className="fw-semibold mb-3">
+            Add New Party
+          </h5>
 
-      <div style={styles.card}>
-        <h3 style={styles.cardTitle}>Saved Parties</h3>
+          <div className="row g-3">
 
-        <input
-          style={{ ...styles.input, marginBottom: 15 }}
-          placeholder="Search by party name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        {/* ✅ NO RESULTS MESSAGE */}
-        {filteredParties.length === 0 && (
-          <p style={{ color: "#777" }}>No matching parties found.</p>
-        )}
-
-        {filteredParties.map((party) => (
-          <div key={party.id} style={styles.partyRow}>
-            <div
-              style={{ cursor: "pointer" }}
-              onClick={() => openPartySamples(party)}
-            >
-              <strong>{highlight(party.name)}</strong>
-              <div style={{ fontSize: 13, color: "#555" }}>
-                📞 {party.contact} | ✉ {party.email}
-              </div>
+            <div className="col-md-4">
+              <input
+                className="form-control"
+                placeholder="Party Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
 
-            <button
-              style={styles.deleteBtn}
-              onClick={() => deleteParty(party.id)}
-            >
-              Delete
-            </button>
+            <div className="col-md-4">
+              <input
+                className="form-control"
+                placeholder="Contact Number"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+              />
+            </div>
+
+            <div className="col-md-4">
+              <input
+                className="form-control"
+                placeholder="Email Address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
           </div>
-        ))}
+
+          <button
+            className="btn btn-primary mt-3"
+            onClick={addParty}
+          >
+            + Add Party
+          </button>
+
+        </div>
+
       </div>
+
+
+
+      {/* PARTY LIST */}
+
+      <div className="card shadow-sm border-0">
+
+        <div className="card-body">
+
+          <div className="d-flex justify-content-between align-items-center mb-3">
+
+            <h5 className="fw-semibold mb-0">
+              Registered Parties
+            </h5>
+
+            <input
+              className="form-control"
+              style={{ maxWidth: 260 }}
+              placeholder="Search party..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+          </div>
+
+
+          <div className="table-responsive">
+
+            <table className="table align-middle">
+
+              <thead>
+
+                <tr>
+                  <th>Party Name</th>
+                  <th>Contact</th>
+                  <th>Email</th>
+                  <th width="160">Actions</th>
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {filteredParties.length === 0 && (
+
+                  <tr>
+                    <td colSpan="4" className="text-center text-muted">
+                      No matching parties found
+                    </td>
+                  </tr>
+
+                )}
+
+                {filteredParties.map((party) => (
+
+                  <tr key={party.id}>
+
+                    <td
+                      style={{ cursor: "pointer", fontWeight: "500" }}
+                      onClick={() => openPartySamples(party)}
+                    >
+                      {party.name}
+                    </td>
+
+                    <td>{party.contact}</td>
+
+                    <td>{party.email}</td>
+
+                    <td>
+
+                      <button
+                        className="btn btn-sm btn-primary me-2"
+                        onClick={() => openPartySamples(party)}
+                      >
+                        Open
+                      </button>
+
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => deleteParty(party.id)}
+                      >
+                        Delete
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
   );
 }
-
-const styles = {
-  wrapper: { maxWidth: 1000, margin: "0 auto", padding: 30, background: "#f9fafc" },
-  header: { display: "flex", alignItems: "center", gap: 20, paddingBottom: 15, borderBottom: "2px solid #ddd", marginBottom: 30 },
-  logo: { height: 80 },
-  hindi: { fontWeight: 700, fontSize: 18 },
-  eng: { fontWeight: 700, fontSize: 18 },
-  sub: { fontSize: 14, color: "#444" },
-  mainTitle: { marginBottom: 5 },
-  desc: { marginBottom: 30, color: "#555" },
-  card: { background: "white", padding: 25, borderRadius: 12, boxShadow: "0 5px 15px rgba(0,0,0,0.05)", marginBottom: 30 },
-  cardTitle: { marginBottom: 20 },
-  formRow: { display: "flex", flexDirection: "column", marginBottom: 18 },
-  label: { marginBottom: 6, fontWeight: 600 },
-  input: { padding: 10, borderRadius: 6, border: "1px solid #ccc" },
-  addBtn: { marginTop: 10, padding: "10px 18px", background: "#0b63d4", color: "white", border: "none", borderRadius: 6, cursor: "pointer" },
-  partyRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: 12, border: "1px solid #ddd", borderRadius: 8, marginBottom: 10, background: "#fafafa" },
-  deleteBtn: { padding: "6px 12px", background: "#d9534f", color: "white", border: "none", borderRadius: 6, cursor: "pointer" },
-};

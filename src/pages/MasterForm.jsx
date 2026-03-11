@@ -8,10 +8,10 @@ import SpecialTestsSection from "../components/masterForm/SpecialTestsSection";
 import SulphurSection from "../components/masterForm/SulphurSection";
 
 export default function MasterForm() {
+
   const { partyId, sampleId } = useParams();
   const navigate = useNavigate();
 
-  // MASTER FORM STATE (entire form stored here)
   const [sampleData, setSampleData] = useState({
 
     proximate: {
@@ -48,60 +48,204 @@ export default function MasterForm() {
 
   });
 
-  // TEMP SAVE (localStorage)
   const saveForm = () => {
+
     localStorage.setItem(
       `form_${partyId}_${sampleId}`,
       JSON.stringify(sampleData)
     );
-    alert("Form saved");
+
+    alert("Form saved successfully");
+
   };
 
   return (
-    <div style={{ padding: 30, maxWidth: 1200, margin: "0 auto" }}>
 
-      <button onClick={() => navigate(-1)} style={{ marginBottom: 20 }}>
-        ← Back
-      </button>
+    <div className="container-fluid py-4">
 
-      <h1>Master Analysis Form</h1>
+      {/* PAGE HEADER */}
 
-      <SampleMeta partyId={partyId} sampleId={sampleId} />
+      <div className="d-flex justify-content-between align-items-center mb-4">
 
-      <ProximateSection
-        data={sampleData}
-        setData={setSampleData}
-      />
+        <div>
+          <h2 className="fw-bold mb-1">
+            Master Analysis Form
+          </h2>
 
-      <UltimateSection
-        data={sampleData}
-        setData={setSampleData}
-      />
+          <p className="text-muted mb-0">
+            Sample ID: <strong>{sampleId}</strong>
+          </p>
+        </div>
 
-      <SpecialTestsSection
-        data={sampleData}
-        setData={setSampleData}
-      />
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => navigate(-1)}
+        >
+          ← Back
+        </button>
 
-      <SulphurSection
-        data={sampleData}
-        setData={setSampleData}
-      />
+      </div>
 
-      <button
-        onClick={saveForm}
-        style={{
-          marginTop: 30,
-          padding: "12px 20px",
-          background: "#0b63d4",
-          color: "white",
-          border: "none",
-          borderRadius: 6
-        }}
-      >
-        Save Form
-      </button>
+      <div className="row">
+
+        {/* LEFT NAVIGATION */}
+
+        <div className="col-md-3">
+
+          <div className="card shadow-sm border-0 position-sticky" style={{top:20}}>
+
+            <div className="card-body">
+
+              <h6 className="fw-bold mb-3">
+                Analysis Sections
+              </h6>
+
+              <div className="list-group">
+
+                <a href="#proximate" className="list-group-item list-group-item-action">
+                  Proximate Analysis
+                </a>
+
+                <a href="#ultimate" className="list-group-item list-group-item-action">
+                  Ultimate Analysis
+                </a>
+
+                <a href="#special" className="list-group-item list-group-item-action">
+                  Special Tests
+                </a>
+
+                <a href="#sulphur" className="list-group-item list-group-item-action">
+                  Sulphur Distribution
+                </a>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* MAIN FORM */}
+
+        <div className="col-md-9">
+
+          {/* SAMPLE INFO */}
+
+          <div className="card shadow-sm border-0 mb-4">
+
+            <div className="card-body">
+
+              <h5 className="fw-semibold mb-3">
+                Sample Information
+              </h5>
+
+              <SampleMeta partyId={partyId} sampleId={sampleId} />
+
+            </div>
+
+          </div>
+
+
+          {/* PROXIMATE */}
+
+          <div id="proximate" className="card shadow-sm border-0 mb-4">
+
+            <div className="card-body">
+
+              <h5 className="fw-bold text-primary mb-3">
+                1. Proximate Analysis
+              </h5>
+
+              <ProximateSection
+                data={sampleData}
+                setData={setSampleData}
+              />
+
+            </div>
+
+          </div>
+
+
+          {/* ULTIMATE */}
+
+          <div id="ultimate" className="card shadow-sm border-0 mb-4">
+
+            <div className="card-body">
+
+              <h5 className="fw-bold text-primary mb-3">
+                2. Ultimate Analysis
+              </h5>
+
+              <UltimateSection
+                data={sampleData}
+                setData={setSampleData}
+              />
+
+            </div>
+
+          </div>
+
+
+          {/* SPECIAL */}
+
+          <div id="special" className="card shadow-sm border-0 mb-4">
+
+            <div className="card-body">
+
+              <h5 className="fw-bold text-primary mb-3">
+                3. Special Tests
+              </h5>
+
+              <SpecialTestsSection
+                data={sampleData}
+                setData={setSampleData}
+              />
+
+            </div>
+
+          </div>
+
+
+          {/* SULPHUR */}
+
+          <div id="sulphur" className="card shadow-sm border-0 mb-4">
+
+            <div className="card-body">
+
+              <h5 className="fw-bold text-primary mb-3">
+                4. Distribution of Sulphur
+              </h5>
+
+              <SulphurSection
+                data={sampleData}
+                setData={setSampleData}
+              />
+
+            </div>
+
+          </div>
+
+
+          {/* SAVE BUTTON */}
+
+          <div className="text-end">
+
+            <button
+              className="btn btn-primary px-4 py-2"
+              onClick={saveForm}
+            >
+              Save Analysis Form
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
 
     </div>
+
   );
 }

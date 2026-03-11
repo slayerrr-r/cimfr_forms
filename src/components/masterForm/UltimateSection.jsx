@@ -14,26 +14,20 @@ export default function UltimateSection({ data, setData }) {
   };
 
   return (
-    <div
-      style={{
-        background: "white",
-        padding: 20,
-        marginTop: 30,
-        borderRadius: 8,
-        border: "1px solid #ddd",
-        overflowX: "auto"
-      }}
-    >
-      <h2>2. Ultimate Analysis</h2>
 
-      <table style={{ minWidth: 700, borderCollapse: "collapse" }}>
-        <thead>
+    <div className="table-responsive">
+
+      <table className="table table-bordered align-middle">
+
+        <thead className="table-light">
+
           <tr>
-            <th>Element (%)</th>
-            <th>Air Dry Basis</th>
+            <th style={{ width: "30%" }}>Element (%)</th>
+            <th>Air Dry Basis (ADB)</th>
             <th>DMF Basis</th>
             <th>60% RH Basis</th>
           </tr>
+
         </thead>
 
         <tbody>
@@ -87,33 +81,59 @@ export default function UltimateSection({ data, setData }) {
           />
 
         </tbody>
+
       </table>
+
     </div>
   );
 }
 
+
+
 function Row({ label, adb, dmf, rh60, onADB, onDMF, onRH }) {
+
   return (
+
     <tr>
-      <td>{label}</td>
+
+      <td className="fw-semibold">
+        {label}
+      </td>
 
       <td>
         {onADB && (
-          <input type="number" value={adb} onChange={e=>onADB(e.target.value)} />
+          <input
+            type="number"
+            className="form-control form-control-sm"
+            value={adb}
+            onChange={e=>onADB(e.target.value)}
+          />
         )}
       </td>
 
       <td>
         {onDMF && (
-          <input type="number" value={dmf} onChange={e=>onDMF(e.target.value)} />
+          <input
+            type="number"
+            className="form-control form-control-sm"
+            value={dmf}
+            onChange={e=>onDMF(e.target.value)}
+          />
         )}
       </td>
 
       <td>
         {onRH && (
-          <input type="number" value={rh60} onChange={e=>onRH(e.target.value)} />
+          <input
+            type="number"
+            className="form-control form-control-sm"
+            value={rh60}
+            onChange={e=>onRH(e.target.value)}
+          />
         )}
       </td>
+
     </tr>
+
   );
 }

@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.sidebar-item{
+  padding:10px 12px;
+  border-radius:6px;
+  margin-bottom:8px;
+  color:#cbd5e1;
+}
+
+.sidebar-item.active{
+  background:#6d28d9;
+  color:white;
+  font-weight:500;
+}

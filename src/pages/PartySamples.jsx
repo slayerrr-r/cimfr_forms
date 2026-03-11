@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 export default function PartySamples() {
+
   const { partyId } = useParams();
   const navigate = useNavigate();
 
@@ -19,8 +20,8 @@ export default function PartySamples() {
     "Ash Content"
   ];
 
-  // LOAD PARTY + SAMPLES
   useEffect(() => {
+
     const storedParties = JSON.parse(localStorage.getItem("parties")) || [];
 
     const foundParty = storedParties.find(
@@ -38,18 +39,24 @@ export default function PartySamples() {
       JSON.parse(localStorage.getItem(`samples_${partyId}`)) || [];
 
     setSamples(storedSamples);
+
   }, [partyId, navigate]);
 
-  // SAVE SAMPLES whenever updated
+
+
   useEffect(() => {
+
     localStorage.setItem(
       `samples_${partyId}`,
       JSON.stringify(samples)
     );
+
   }, [samples, partyId]);
 
-  // ADD SAMPLE
+
+
   const addSample = () => {
+
     if (!sampleName.trim() || selectedTests.length === 0) {
       alert("Enter sample name and select tests");
       return;
@@ -63,177 +70,226 @@ export default function PartySamples() {
     };
 
     setSamples([newSample, ...samples]);
+
     setSampleName("");
     setSelectedTests([]);
   };
 
-  // DELETE SAMPLE
+
+
   const deleteSample = (id) => {
+
     if (!window.confirm("Delete this sample?")) return;
+
     setSamples(samples.filter((s) => s.id !== id));
+
   };
 
-  // FILTER + SORT
-  const filteredSamples = [...samples]
-    .filter((s) =>
-      s.name.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) => {
-      const aStarts = a.name.toLowerCase().startsWith(search.toLowerCase());
-      const bStarts = b.name.toLowerCase().startsWith(search.toLowerCase());
 
-      if (aStarts && !bStarts) return -1;
-      if (!aStarts && bStarts) return 1;
-      return 0;
-    });
+
+  const filteredSamples = samples.filter((s) =>
+    s.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+
 
   return (
-    <div style={{ maxWidth: 1000, margin: "30px auto" }}>
-      
-      <button onClick={() => navigate("/")} style={{ marginBottom: 20 }}>
-        ← Back
-      </button>
 
-      <h2>Samples for {partyName}</h2>
+    <div className="container-fluid py-4">
 
-      {/* ADD SAMPLE */}
-      <div style={{
-        background: "white",
-        padding: 20,
-        marginTop: 20,
-        borderRadius: 10,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
-      }}>
-        <h3>Add Sample</h3>
 
-        <input
-          placeholder="Sample Name"
-          value={sampleName}
-          onChange={(e) => setSampleName(e.target.value)}
-          style={{
-            width: "100%",
-            padding: 10,
-            marginBottom: 15,
-            borderRadius: 6,
-            border: "1px solid #ccc"
-          }}
-        />
+      {/* PAGE HEADER */}
 
-        <div style={{ marginBottom: 10, fontWeight: 600 }}>
-          Select Tests:
+      <div className="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+          <h2 className="page-title">Sample Management</h2>
+          <p className="text-muted mb-0">
+            Party: <strong>{partyName}</strong>
+          </p>
         </div>
 
-        {testOptions.map((test) => (
-          <div key={test}>
-            <label>
-              <input
-                type="checkbox"
-                value={test}
-                checked={selectedTests.includes(test)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedTests([...selectedTests, test]);
-                  } else {
-                    setSelectedTests(
-                      selectedTests.filter((t) => t !== test)
-                    );
-                  }
-                }}
-              />
-              {" "} {test}
-            </label>
-          </div>
-        ))}
-
         <button
-          onClick={addSample}
-          style={{
-            marginTop: 15,
-            padding: "10px 18px",
-            background: "#0b63d4",
-            color: "white",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer"
-          }}
+          className="btn btn-outline-secondary"
+          onClick={() => navigate("/")}
         >
-          + Add Sample
+          ← Back
         </button>
+
       </div>
 
-      {/* PREVIOUS SAMPLES */}
-      <div style={{
-        background: "white",
-        padding: 20,
-        marginTop: 30,
-        borderRadius: 10,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
-      }}>
-        <h3>Previous Samples</h3>
 
-        <input
-          placeholder="Search by sample name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            width: "100%",
-            padding: 10,
-            marginBottom: 20,
-            borderRadius: 6,
-            border: "1px solid #ccc"
-          }}
-        />
 
-        {filteredSamples.length === 0 ? (
-          <p>No samples found.</p>
-        ) : (
-          filteredSamples.map((sample) => (
-            <div
-              key={sample.id}
-              style={{
-                border: "1px solid #ddd",
-                padding: 15,
-                borderRadius: 8,
-                marginBottom: 15,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                background: "#fafafa"
-              }}
-            >
-              {/* CLICKABLE AREA */}
-              <div
-                onClick={() =>
-                  navigate(`/sample/${partyId}/${sample.id}`)
-                }
-                style={{ cursor: "pointer", flex: 1 }}
-              >
-                <strong>{sample.name}</strong>
-                <div>Date: {sample.date}</div>
-                <div>Tests: {sample.tests.join(", ")}</div>
+      {/* ADD SAMPLE */}
+
+      <div className="section-card">
+
+        <h5 className="mb-3">Add New Sample</h5>
+
+        <div className="row mb-3">
+
+          <div className="col-md-6">
+
+            <label className="form-label">Sample Name</label>
+
+            <input
+              className="form-control"
+              placeholder="Enter sample name"
+              value={sampleName}
+              onChange={(e) => setSampleName(e.target.value)}
+            />
+
+          </div>
+
+        </div>
+
+
+
+        <label className="form-label mb-2">
+          Select Required Tests
+        </label>
+
+
+        <div className="row">
+
+          {testOptions.map((test) => (
+
+            <div className="col-md-4 mb-2" key={test}>
+
+              <div className="form-check">
+
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  checked={selectedTests.includes(test)}
+                  onChange={(e) => {
+
+                    if (e.target.checked) {
+                      setSelectedTests([...selectedTests, test]);
+                    } else {
+                      setSelectedTests(
+                        selectedTests.filter((t) => t !== test)
+                      );
+                    }
+
+                  }}
+                />
+
+                <label className="form-check-label">
+                  {test}
+                </label>
+
               </div>
 
-              {/* DELETE BUTTON */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteSample(sample.id);
-                }}
-                style={{
-                  padding: "8px 14px",
-                  background: "#d9534f",
-                  color: "white",
-                  border: "none",
-                  borderRadius: 6,
-                  cursor: "pointer"
-                }}
-              >
-                Delete
-              </button>
             </div>
-          ))
-        )}
+
+          ))}
+
+        </div>
+
+
+        <button
+          className="btn btn-primary mt-3"
+          onClick={addSample}
+        >
+          Add Sample
+        </button>
+
       </div>
+
+
+
+      {/* SAMPLE LIST */}
+
+      <div className="section-card">
+
+        <div className="d-flex justify-content-between align-items-center mb-3">
+
+          <h5 className="mb-0">Previous Samples</h5>
+
+          <input
+            className="form-control"
+            style={{ maxWidth: 260 }}
+            placeholder="Search sample..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+        </div>
+
+
+
+        <table className="table table-hover align-middle">
+
+          <thead>
+
+            <tr>
+              <th>Sample Name</th>
+              <th>Date</th>
+              <th>Tests</th>
+              <th width="150">Actions</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {filteredSamples.length === 0 && (
+              <tr>
+                <td colSpan="4" className="text-center text-muted">
+                  No samples found
+                </td>
+              </tr>
+            )}
+
+
+            {filteredSamples.map((sample) => (
+
+              <tr key={sample.id}>
+
+                <td
+                  style={{ cursor: "pointer", color: "#2563eb", fontWeight: 500 }}
+                  onClick={() =>
+                    navigate(`/sample/${partyId}/${sample.id}`)
+                  }
+                >
+                  {sample.name}
+                </td>
+
+                <td>{sample.date}</td>
+
+                <td>{sample.tests.join(", ")}</td>
+
+                <td>
+
+                  <button
+                    className="btn btn-sm btn-primary me-2"
+                    onClick={() =>
+                      navigate(`/sample/${partyId}/${sample.id}`)
+                    }
+                  >
+                    Open
+                  </button>
+
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => deleteSample(sample.id)}
+                  >
+                    Delete
+                  </button>
+
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
     </div>
   );
 }
