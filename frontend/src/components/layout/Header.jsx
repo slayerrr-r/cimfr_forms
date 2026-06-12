@@ -2,10 +2,16 @@ import logo from "../../assets/logo.jpg";
 
 export default function Header() {
   return (
-    <div>
-
-      {/* MAIN HEADER */}
-
+    <header
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 2000,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.25)"
+      }}
+    >
       <div
         style={{
           background: "#0f172a",
@@ -15,33 +21,41 @@ export default function Header() {
       >
         <div
           style={{
-            maxWidth: "1400px",
-            margin: "auto",
+            width: "100%",
+            padding: "14px 30px",
             display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
-            padding: "14px 20px"
+            alignItems: "center",
+            boxSizing: "border-box"
           }}
         >
+          {/* LEFT SIDE */}
 
-          {/* LEFT SIDE — LOGO + TITLE */}
-
-          <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
-
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "18px"
+            }}
+          >
             <img
               src={logo}
               alt="CIMFR"
               style={{
-                height: "75px"
+                height: "85px",
+                width: "85px",
+                objectFit: "contain",
+                background: "white",
+                padding: "4px",
+                borderRadius: "6px"
               }}
             />
 
             <div>
-
               <div
                 style={{
-                  fontSize: "18px",
-                  fontWeight: "600"
+                  fontSize: "20px",
+                  fontWeight: "700"
                 }}
               >
                 सीएसआईआर - केन्द्रीय खनन एवं ईंधन अनुसंधान संस्थान
@@ -49,8 +63,8 @@ export default function Header() {
 
               <div
                 style={{
-                  fontSize: "18px",
-                  fontWeight: "600"
+                  fontSize: "19px",
+                  fontWeight: "700"
                 }}
               >
                 CSIR - CENTRAL INSTITUTE OF MINING AND FUEL RESEARCH
@@ -73,100 +87,57 @@ export default function Header() {
               >
                 Laboratory Information Management System
               </div>
-
             </div>
-
           </div>
 
-
-          {/* RIGHT SIDE — SEARCH + USER */}
+          {/* RIGHT SIDE */}
 
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "20px"
+              gap: "24px"
             }}
           >
-
-            {/* SEARCH */}
-
             <input
               placeholder="Search system..."
               style={{
-                padding: "8px 12px",
-                borderRadius: "6px",
-                border: "none",
-                width: "220px"
+                width: "260px",
+                padding: "10px 14px",
+                borderRadius: "8px",
+                border: "1px solid #334155",
+                outline: "none",
+                background: "#ffffff",
+                color: "#111827"
               }}
             />
 
-            {/* USER */}
-
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontWeight: "500" }}>
+            <div
+              style={{
+                textAlign: "right"
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "600"
+                }}
+              >
                 Admin User
               </div>
 
               <div
                 style={{
-                  fontSize: "12px",
-                  opacity: 0.7
+                  fontSize: "13px",
+                  opacity: 0.75
                 }}
               >
                 System Administrator
               </div>
             </div>
-
           </div>
-
         </div>
       </div>
-
-
-
-      {/* NAVIGATION BAR */}
-
-      <div
-        style={{
-          background: "#1e293b",
-          color: "white"
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1400px",
-            margin: "auto",
-            display: "flex",
-            gap: "30px",
-            padding: "10px 20px",
-            fontSize: "14px"
-          }}
-        >
-
-          <div style={{ cursor: "pointer", fontWeight: "500" }}>
-            Home
-          </div>
-
-          <div style={{ cursor: "pointer" }}>
-            Laboratory Systems
-          </div>
-
-          <div style={{ cursor: "pointer" }}>
-            Sample Tracking
-          </div>
-
-          <div style={{ cursor: "pointer" }}>
-            Analysis Reports
-          </div>
-
-          <div style={{ cursor: "pointer" }}>
-            Help
-          </div>
-
-        </div>
-      </div>
-
-    </div>
+    </header>
   );
 }
