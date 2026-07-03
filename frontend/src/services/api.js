@@ -1,13 +1,14 @@
-const API_BASE = "/api";
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  "http://127.0.0.1:8000";
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
-  
-  // Set headers
+
   const headers = {
     ...options.headers,
   };
-  
+
   if (options.body && !(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
@@ -19,24 +20,23 @@ async function request(endpoint, options = {}) {
 
   if (!response.ok) {
     let errorMessage = `HTTP error! status: ${response.status}`;
+
     try {
       const errorData = await response.json();
       errorMessage = errorData?.detail || errorMessage;
-    } catch (e) {
-      // JSON parsing failed, use status text
+    } catch {
       errorMessage = response.statusText || errorMessage;
     }
+
     throw new Error(errorMessage);
   }
 
-  // Handle 204 No Content
   if (response.status === 204) {
     return null;
   }
 
   return response.json();
 }
-
 export const api = {
   // Parties
   getParties: (search = "") => {
