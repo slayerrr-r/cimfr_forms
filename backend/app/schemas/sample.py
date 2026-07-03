@@ -17,5 +17,6 @@ class SampleRead(BaseModel):
     name: str
     date: str
     tests: list[str]
+    status: str
     created_at: datetime
     updated_at: datetime

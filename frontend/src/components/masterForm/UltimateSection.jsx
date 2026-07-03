@@ -1,4 +1,4 @@
-export default function UltimateSection({ data, setData }) {
+export default function UltimateSection({ data, setData, editable = true }) {
 
   const handleChange = (basis, field, value) => {
     setData(prev => ({
@@ -12,6 +12,9 @@ export default function UltimateSection({ data, setData }) {
       }
     }));
   };
+
+  const onInput = (basis, field) =>
+    editable ? (value) => handleChange(basis, field, value) : undefined;
 
   return (
 
@@ -37,9 +40,9 @@ export default function UltimateSection({ data, setData }) {
             adb={data.ultimate.adb.c}
             dmf={data.ultimate.dmf.c}
             rh60={data.ultimate.rh60.c}
-            onADB={v=>handleChange("adb","c",v)}
-            onDMF={v=>handleChange("dmf","c",v)}
-            onRH={v=>handleChange("rh60","c",v)}
+            onADB={onInput("adb","c")}
+            onDMF={onInput("dmf","c")}
+            onRH={onInput("rh60","c")}
           />
 
           <Row
@@ -47,9 +50,9 @@ export default function UltimateSection({ data, setData }) {
             adb={data.ultimate.adb.h}
             dmf={data.ultimate.dmf.h}
             rh60={data.ultimate.rh60.h}
-            onADB={v=>handleChange("adb","h",v)}
-            onDMF={v=>handleChange("dmf","h",v)}
-            onRH={v=>handleChange("rh60","h",v)}
+            onADB={onInput("adb","h")}
+            onDMF={onInput("dmf","h")}
+            onRH={onInput("rh60","h")}
           />
 
           <Row
@@ -57,9 +60,9 @@ export default function UltimateSection({ data, setData }) {
             adb={data.ultimate.adb.n}
             dmf={data.ultimate.dmf.n}
             rh60={data.ultimate.rh60.n}
-            onADB={v=>handleChange("adb","n",v)}
-            onDMF={v=>handleChange("dmf","n",v)}
-            onRH={v=>handleChange("rh60","n",v)}
+            onADB={onInput("adb","n")}
+            onDMF={onInput("dmf","n")}
+            onRH={onInput("rh60","n")}
           />
 
           <Row
@@ -67,17 +70,17 @@ export default function UltimateSection({ data, setData }) {
             adb={data.ultimate.adb.s}
             dmf={data.ultimate.dmf.s}
             rh60={data.ultimate.rh60.s}
-            onADB={v=>handleChange("adb","s",v)}
-            onDMF={v=>handleChange("dmf","s",v)}
-            onRH={v=>handleChange("rh60","s",v)}
+            onADB={onInput("adb","s")}
+            onDMF={onInput("dmf","s")}
+            onRH={onInput("rh60","s")}
           />
 
           <Row
             label="Oxygen (O)"
             adb={data.ultimate.adb.o}
             rh60={data.ultimate.rh60.o}
-            onADB={v=>handleChange("adb","o",v)}
-            onRH={v=>handleChange("rh60","o",v)}
+            onADB={onInput("adb","o")}
+            onRH={onInput("rh60","o")}
           />
 
         </tbody>
@@ -101,36 +104,33 @@ function Row({ label, adb, dmf, rh60, onADB, onDMF, onRH }) {
       </td>
 
       <td>
-        {onADB && (
-          <input
-            type="number"
-            className="form-control form-control-sm"
-            value={adb}
-            onChange={e=>onADB(e.target.value)}
-          />
-        )}
+        <input
+          type="number"
+          className="form-control form-control-sm"
+          value={adb}
+          onChange={onADB ? (e) => onADB(e.target.value) : undefined}
+          disabled={!onADB}
+        />
       </td>
 
       <td>
-        {onDMF && (
-          <input
-            type="number"
-            className="form-control form-control-sm"
-            value={dmf}
-            onChange={e=>onDMF(e.target.value)}
-          />
-        )}
+        <input
+          type="number"
+          className="form-control form-control-sm"
+          value={dmf}
+          onChange={onDMF ? (e) => onDMF(e.target.value) : undefined}
+          disabled={!onDMF}
+        />
       </td>
 
       <td>
-        {onRH && (
-          <input
-            type="number"
-            className="form-control form-control-sm"
-            value={rh60}
-            onChange={e=>onRH(e.target.value)}
-          />
-        )}
+        <input
+          type="number"
+          className="form-control form-control-sm"
+          value={rh60}
+          onChange={onRH ? (e) => onRH(e.target.value) : undefined}
+          disabled={!onRH}
+        />
       </td>
 
     </tr>

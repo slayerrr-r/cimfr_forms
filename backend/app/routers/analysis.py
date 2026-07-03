@@ -15,5 +15,5 @@ def read_analysis(sample_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/samples/{sample_id}/analysis")
-def update_analysis(sample_id: int, payload: AnalysisPayload, db: Session = Depends(get_db)):
-    return {"sample_id": sample_id, "analysis": repository.save_analysis(db, sample_id, payload)}
+def update_analysis(sample_id: int, payload: AnalysisPayload, role: str | None = None, db: Session = Depends(get_db)):
+    return {"sample_id": sample_id, "analysis": repository.save_analysis(db, sample_id, payload, role)}

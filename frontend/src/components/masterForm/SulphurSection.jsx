@@ -1,4 +1,4 @@
-export default function SulphurSection({ data, setData }) {
+export default function SulphurSection({ data, setData, editable = true }) {
 
   const handleChange = (type, field, value) => {
     setData(prev => ({
@@ -12,6 +12,9 @@ export default function SulphurSection({ data, setData }) {
       }
     }));
   };
+
+  const onInput = (type, field) =>
+    editable ? (value) => handleChange(type, field, value) : undefined;
 
   return (
 
@@ -35,24 +38,24 @@ export default function SulphurSection({ data, setData }) {
             label="Pyritic S"
             coal={data.sulphur.pyritic.coal}
             sulphur={data.sulphur.pyritic.sulphur}
-            onCoal={v=>handleChange("pyritic","coal",v)}
-            onSulphur={v=>handleChange("pyritic","sulphur",v)}
+            onCoal={onInput("pyritic","coal")}
+            onSulphur={onInput("pyritic","sulphur")}
           />
 
           <Row
             label="Sulphate S"
             coal={data.sulphur.sulphate.coal}
             sulphur={data.sulphur.sulphate.sulphur}
-            onCoal={v=>handleChange("sulphate","coal",v)}
-            onSulphur={v=>handleChange("sulphate","sulphur",v)}
+            onCoal={onInput("sulphate","coal")}
+            onSulphur={onInput("sulphate","sulphur")}
           />
 
           <Row
             label="Organic S"
             coal={data.sulphur.organic.coal}
             sulphur={data.sulphur.organic.sulphur}
-            onCoal={v=>handleChange("organic","coal",v)}
-            onSulphur={v=>handleChange("organic","sulphur",v)}
+            onCoal={onInput("organic","coal")}
+            onSulphur={onInput("organic","sulphur")}
           />
 
         </tbody>
@@ -80,7 +83,8 @@ function Row({ label, coal, sulphur, onCoal, onSulphur }) {
           type="number"
           className="form-control form-control-sm"
           value={coal}
-          onChange={(e)=>onCoal(e.target.value)}
+          onChange={onCoal ? (e) => onCoal(e.target.value) : undefined}
+          disabled={!onCoal}
         />
       </td>
 
@@ -89,7 +93,8 @@ function Row({ label, coal, sulphur, onCoal, onSulphur }) {
           type="number"
           className="form-control form-control-sm"
           value={sulphur}
-          onChange={(e)=>onSulphur(e.target.value)}
+          onChange={onSulphur ? (e) => onSulphur(e.target.value) : undefined}
+          disabled={!onSulphur}
         />
       </td>
 

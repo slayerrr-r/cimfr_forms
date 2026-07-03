@@ -18,12 +18,12 @@ export default function Navbar() {
 
             <li className="nav-item">
               <Link className="nav-link" to="/">
-                Parties
-              </Link>
-            </li>
+              Dashboard
+            </Link>
+          </li>
 
-          </ul>
-
+          <li className="nav-item">
+            <Link className="nav-link" to="/parties">
           <span className="navbar-text text-white">
             Admin Panel
           </span>

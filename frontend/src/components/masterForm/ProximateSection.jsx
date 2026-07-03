@@ -1,4 +1,4 @@
-export default function ProximateSection({ data, setData }) {
+export default function ProximateSection({ data, setData, editable = true }) {
 
   const handleChange = (basis, field, value) => {
     setData(prev => ({
@@ -12,6 +12,9 @@ export default function ProximateSection({ data, setData }) {
       }
     }));
   };
+
+  const onInput = (basis, field) =>
+    editable ? (value) => handleChange(basis, field, value) : undefined;
 
   return (
 
@@ -36,16 +39,16 @@ export default function ProximateSection({ data, setData }) {
             label="Moisture (%)"
             adb={data.proximate.adb.moisture}
             rh60={data.proximate.rh60.moisture}
-            onADB={v=>handleChange("adb","moisture",v)}
-            onRH={v=>handleChange("rh60","moisture",v)}
+            onADB={onInput("adb","moisture")}
+            onRH={onInput("rh60","moisture")}
           />
 
           <Row
             label="Ash (%)"
             adb={data.proximate.adb.ash}
             rh60={data.proximate.rh60.ash}
-            onADB={v=>handleChange("adb","ash",v)}
-            onRH={v=>handleChange("rh60","ash",v)}
+            onADB={onInput("adb","ash")}
+            onRH={onInput("rh60","ash")}
           />
 
           <Row
@@ -53,17 +56,17 @@ export default function ProximateSection({ data, setData }) {
             adb={data.proximate.adb.vm}
             dmf={data.proximate.dmf.vm}
             rh60={data.proximate.rh60.vm}
-            onADB={v=>handleChange("adb","vm",v)}
-            onDMF={v=>handleChange("dmf","vm",v)}
-            onRH={v=>handleChange("rh60","vm",v)}
+            onADB={onInput("adb","vm")}
+            onDMF={onInput("dmf","vm")}
+            onRH={onInput("rh60","vm")}
           />
 
           <Row
             label="Fixed Carbon (%)"
             adb={data.proximate.adb.fc}
             rh60={data.proximate.rh60.fc}
-            onADB={v=>handleChange("adb","fc",v)}
-            onRH={v=>handleChange("rh60","fc",v)}
+            onADB={onInput("adb","fc")}
+            onRH={onInput("rh60","fc")}
           />
 
           <Row
@@ -71,9 +74,9 @@ export default function ProximateSection({ data, setData }) {
             adb={data.proximate.adb.gcv}
             dmf={data.proximate.dmf.gcv}
             rh60={data.proximate.rh60.gcv}
-            onADB={v=>handleChange("adb","gcv",v)}
-            onDMF={v=>handleChange("dmf","gcv",v)}
-            onRH={v=>handleChange("rh60","gcv",v)}
+            onADB={onInput("adb","gcv")}
+            onDMF={onInput("dmf","gcv")}
+            onRH={onInput("rh60","gcv")}
           />
 
         </tbody>
@@ -97,36 +100,33 @@ function Row({ label, adb, dmf, rh60, onADB, onDMF, onRH }) {
       </td>
 
       <td>
-        {onADB && (
-          <input
-            type="number"
-            className="form-control form-control-sm"
-            value={adb}
-            onChange={e=>onADB(e.target.value)}
-          />
-        )}
+        <input
+          type="number"
+          className="form-control form-control-sm"
+          value={adb}
+          onChange={onADB ? (e) => onADB(e.target.value) : undefined}
+          disabled={!onADB}
+        />
       </td>
 
       <td>
-        {onDMF && (
-          <input
-            type="number"
-            className="form-control form-control-sm"
-            value={dmf}
-            onChange={e=>onDMF(e.target.value)}
-          />
-        )}
+        <input
+          type="number"
+          className="form-control form-control-sm"
+          value={dmf}
+          onChange={onDMF ? (e) => onDMF(e.target.value) : undefined}
+          disabled={!onDMF}
+        />
       </td>
 
       <td>
-        {onRH && (
-          <input
-            type="number"
-            className="form-control form-control-sm"
-            value={rh60}
-            onChange={e=>onRH(e.target.value)}
-          />
-        )}
+        <input
+          type="number"
+          className="form-control form-control-sm"
+          value={rh60}
+          onChange={onRH ? (e) => onRH(e.target.value) : undefined}
+          disabled={!onRH}
+        />
       </td>
 
     </tr>

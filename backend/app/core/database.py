@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.core.config import DATABASE_URL
@@ -31,6 +31,10 @@ def seed_database():
 
     db = SessionLocal()
     try:
+        if engine.dialect.name == "sqlite":
+            db.execute(text("ALTER TABLE samples ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Waiting for S1'"))
         seed_defaults(db)
+    except Exception:
+        db.rollback()
     finally:
         db.close()

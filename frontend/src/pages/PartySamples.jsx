@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { api } from "../services/api";
 
 export default function PartySamples() {
 
@@ -8,6 +9,8 @@ export default function PartySamples() {
 
   const [partyName, setPartyName] = useState("");
   const [samples, setSamples] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [sampleName, setSampleName] = useState("");
   const [selectedTests, setSelectedTests] = useState([]);
@@ -20,68 +23,56 @@ export default function PartySamples() {
     "Ash Content"
   ];
 
-  useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const party = await api.getParty(partyId);
+      setPartyName(party.name);
 
-    const storedParties = JSON.parse(localStorage.getItem("parties")) || [];
-
-    const foundParty = storedParties.find(
-      (p) => p.id.toString() === partyId
-    );
-
-    if (!foundParty) {
-      navigate("/");
-      return;
+      const samplesData = await api.getSamples(partyId);
+      setSamples(samplesData);
+    } catch (err) {
+      setError(err.message || "Failed to load party or samples");
+    } finally {
+      setLoading(false);
     }
-
-    setPartyName(foundParty.name);
-
-    const storedSamples =
-      JSON.parse(localStorage.getItem(`samples_${partyId}`)) || [];
-
-    setSamples(storedSamples);
-
-  }, [partyId, navigate]);
-
-
+  };
 
   useEffect(() => {
+    fetchData();
+  }, [partyId]);
 
-    localStorage.setItem(
-      `samples_${partyId}`,
-      JSON.stringify(samples)
-    );
-
-  }, [samples, partyId]);
-
-
-
-  const addSample = () => {
+  const addSample = async () => {
 
     if (!sampleName.trim() || selectedTests.length === 0) {
       alert("Enter sample name and select tests");
       return;
     }
 
-    const newSample = {
-      id: Date.now(),
-      name: sampleName,
-      date: new Date().toLocaleDateString(),
-      tests: selectedTests
-    };
-
-    setSamples([newSample, ...samples]);
-
-    setSampleName("");
-    setSelectedTests([]);
+    try {
+      await api.createSample(partyId, {
+        name: sampleName,
+        tests: selectedTests
+      });
+      setSampleName("");
+      setSelectedTests([]);
+      await fetchData();
+    } catch (err) {
+      alert(err.message || "Failed to add sample");
+    }
   };
 
-
-
-  const deleteSample = (id) => {
+  const deleteSample = async (id) => {
 
     if (!window.confirm("Delete this sample?")) return;
 
-    setSamples(samples.filter((s) => s.id !== id));
+    try {
+      await api.deleteSample(id);
+      await fetchData();
+    } catch (err) {
+      alert(err.message || "Failed to delete sample");
+    }
 
   };
 
@@ -118,52 +109,32 @@ export default function PartySamples() {
 
       </div>
 
-
-
-      {/* ADD SAMPLE */}
-
-      <div className="section-card">
-
-        <h5 className="mb-3">Add New Sample</h5>
-
-        <div className="row mb-3">
-
+      <div className="card shadow-sm border-0 mb-4 p-4">
+        <div className="row g-3">
           <div className="col-md-6">
-
             <label className="form-label">Sample Name</label>
-
             <input
               className="form-control"
               placeholder="Enter sample name"
               value={sampleName}
               onChange={(e) => setSampleName(e.target.value)}
             />
-
           </div>
-
         </div>
 
-
-
-        <label className="form-label mb-2">
+        <label className="form-label mb-2 mt-4">
           Select Required Tests
         </label>
 
-
         <div className="row">
-
           {testOptions.map((test) => (
-
             <div className="col-md-4 mb-2" key={test}>
-
               <div className="form-check">
-
                 <input
                   className="form-check-input"
                   type="checkbox"
                   checked={selectedTests.includes(test)}
                   onChange={(e) => {
-
                     if (e.target.checked) {
                       setSelectedTests([...selectedTests, test]);
                     } else {
@@ -171,22 +142,16 @@ export default function PartySamples() {
                         selectedTests.filter((t) => t !== test)
                       );
                     }
-
                   }}
                 />
 
                 <label className="form-check-label">
                   {test}
                 </label>
-
               </div>
-
             </div>
-
           ))}
-
         </div>
-
 
         <button
           className="btn btn-primary mt-3"
@@ -194,10 +159,7 @@ export default function PartySamples() {
         >
           Add Sample
         </button>
-
       </div>
-
-
 
       {/* SAMPLE LIST */}
 
@@ -220,69 +182,78 @@ export default function PartySamples() {
 
 
         <table className="table table-hover align-middle">
-
           <thead>
-
             <tr>
               <th>Sample Name</th>
               <th>Date</th>
               <th>Tests</th>
-              <th width="150">Actions</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
-
           </thead>
-
           <tbody>
 
-            {filteredSamples.length === 0 && (
+            {loading ? (
               <tr>
-                <td colSpan="4" className="text-center text-muted">
+                <td colSpan="5" className="text-center py-4">
+                  <div className="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                  Loading samples...
+                </td>
+              </tr>
+            ) : error ? (
+              <tr>
+                <td colSpan="5" className="text-center text-danger py-4">
+                  Error loading samples: {error}
+                </td>
+              </tr>
+            ) : filteredSamples.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="text-center text-muted py-4">
                   No samples found
                 </td>
               </tr>
-            )}
-
-
-            {filteredSamples.map((sample) => (
-
-              <tr key={sample.id}>
-
-                <td
-                  style={{ cursor: "pointer", color: "#2563eb", fontWeight: 500 }}
-                  onClick={() =>
-                    navigate(`/sample/${partyId}/${sample.id}`)
-                  }
-                >
-                  {sample.name}
-                </td>
-
-                <td>{sample.date}</td>
-
-                <td>{sample.tests.join(", ")}</td>
-
-                <td>
-
-                  <button
-                    className="btn btn-sm btn-primary me-2"
+            ) : (
+              filteredSamples.map((sample) => (
+                <tr key={sample.id}>
+                  <td
+                    style={{ cursor: "pointer", color: "#2563eb", fontWeight: 500 }}
                     onClick={() =>
                       navigate(`/sample/${partyId}/${sample.id}`)
                     }
                   >
-                    Open
-                  </button>
+                    {sample.name}
+                  </td>
 
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => deleteSample(sample.id)}
-                  >
-                    Delete
-                  </button>
+                  <td>{sample.date}</td>
 
-                </td>
+                  <td>{sample.tests.join(", ")}</td>
 
-              </tr>
+                  <td>
+                    <span className="badge bg-secondary">
+                      {sample.status}
+                    </span>
+                  </td>
 
-            ))}
+                  <td>
+                    <button
+                      className="btn btn-sm btn-primary me-2"
+                      onClick={() =>
+                        navigate(`/sample/${partyId}/${sample.id}`)
+                      }
+                    >
+                      Open
+                    </button>
+
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => deleteSample(sample.id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
 
           </tbody>
 

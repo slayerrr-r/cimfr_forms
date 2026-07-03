@@ -25,6 +25,7 @@ class Sample(Base):
     name = Column(String(200), nullable=False, index=True)
     date = Column(String(50), nullable=False)
     tests = Column(JSON, nullable=False, default=list)
+    status = Column(String(50), nullable=False, default="Waiting for S1")
     created_at = Column(DateTime, default=utc_now, nullable=False)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now, nullable=False)
 

@@ -1,74 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../services/api";
 
 export default function PartyDashboard() {
 
   const navigate = useNavigate();
 
-  const DUMMY_PARTIES = [
-    { id: 1, name: "Adani Minerals", contact: "9876543210", email: "adani@gmail.com" },
-    { id: 2, name: "Tata Steel", contact: "9123456780", email: "tata@gmail.com" },
-    { id: 3, name: "Coal India Ltd", contact: "9988776655", email: "coal@gmail.com" },
-    { id: 4, name: "Vedanta Ltd", contact: "9090909090", email: "vedanta@gmail.com" },
-    { id: 5, name: "Hindustan Zinc", contact: "9111222333", email: "hzl@gmail.com" },
-  ];
-
-  const [parties, setParties] = useState(() => {
-    const saved = localStorage.getItem("parties");
-    if (!saved) return DUMMY_PARTIES;
-
-    try {
-      const parsed = JSON.parse(saved);
-      return parsed.length ? parsed : DUMMY_PARTIES;
-    } catch {
-      return DUMMY_PARTIES;
-    }
-  });
-
+  const [parties, setParties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
 
-  React.useEffect(() => {
-    localStorage.setItem("parties", JSON.stringify(parties));
-  }, [parties]);
+  const fetchParties = async (query = "") => {
+    try {
+      setLoading(true);
+      const data = await api.getParties(query);
+      setParties(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message || "Failed to load parties");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const addParty = () => {
+  useEffect(() => {
+    fetchParties(search);
+  }, [search]);
+
+  const addParty = async () => {
 
     if (!name.trim() || !contact.trim() || !email.trim()) {
       alert("Please fill all fields");
       return;
     }
 
-    const newParty = {
-      id: Date.now(),
-      name,
-      contact,
-      email,
-    };
-
-    setParties([newParty, ...parties]);
-
-    setName("");
-    setContact("");
-    setEmail("");
+    try {
+      await api.createParty({ name, contact, email });
+      setName("");
+      setContact("");
+      setEmail("");
+      await fetchParties(search);
+    } catch (err) {
+      alert(err.message || "Failed to add party");
+    }
   };
 
-  const deleteParty = (id) => {
+  const deleteParty = async (id) => {
 
     if (!window.confirm("Delete this party?")) return;
 
-    setParties(parties.filter((p) => p.id !== id));
+    try {
+      await api.deleteParty(id);
+      await fetchParties(search);
+    } catch (err) {
+      alert(err.message || "Failed to delete party");
+    }
   };
 
   const openPartySamples = (party) => {
     navigate(`/party/${party.id}`);
   };
-
-  const filteredParties = parties.filter((party) =>
-    party.name.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
 
@@ -186,52 +181,57 @@ export default function PartyDashboard() {
 
               <tbody>
 
-                {filteredParties.length === 0 && (
-
+                {loading ? (
                   <tr>
-                    <td colSpan="4" className="text-center text-muted">
+                    <td colSpan="4" className="text-center py-4">
+                      <div className="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                      Loading registered parties...
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan="4" className="text-center text-danger py-4">
+                      Error loading parties: {error}
+                    </td>
+                  </tr>
+                ) : parties.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="text-center text-muted py-4">
                       No matching parties found
                     </td>
                   </tr>
-
-                )}
-
-                {filteredParties.map((party) => (
-
-                  <tr key={party.id}>
-
-                    <td
-                      style={{ cursor: "pointer", fontWeight: "500" }}
-                      onClick={() => openPartySamples(party)}
-                    >
-                      {party.name}
-                    </td>
-
-                    <td>{party.contact}</td>
-
-                    <td>{party.email}</td>
-
-                    <td>
-
-                      <button
-                        className="btn btn-sm btn-primary me-2"
+                ) : (
+                  parties.map((party) => (
+                    <tr key={party.id}>
+                      <td
+                        style={{ cursor: "pointer", fontWeight: "500" }}
                         onClick={() => openPartySamples(party)}
                       >
-                        Open
-                      </button>
+                        {party.name}
+                      </td>
 
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => deleteParty(party.id)}
-                      >
-                        Delete
-                      </button>
+                      <td>{party.contact}</td>
 
-                    </td>
+                      <td>{party.email}</td>
 
-                  </tr>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-primary me-2"
+                          onClick={() => openPartySamples(party)}
+                        >
+                          Open
+                        </button>
 
-                ))}
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => deleteParty(party.id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
 
               </tbody>
 

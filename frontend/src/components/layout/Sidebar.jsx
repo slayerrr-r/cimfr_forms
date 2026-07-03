@@ -46,7 +46,7 @@ export default function Sidebar() {
       </div>
 
       <NavItem
-        label="Home"
+        label="Dashboard"
         icon="⌂"
         active={active === "home"}
         onClick={() => navigate("/")}
@@ -56,7 +56,7 @@ export default function Sidebar() {
         label="Parties"
         icon="▣"
         active={active === "parties"}
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/parties")}
       />
 
       <NavItem

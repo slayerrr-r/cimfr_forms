@@ -7,6 +7,7 @@ from app.models.entities import AnalysisRecord, Party, Sample
 from app.schemas.analysis import AnalysisPayload
 from app.schemas.party import PartyCreate
 from app.schemas.sample import SampleCreate
+from app.services.calculation_service import calculate_analysis
 
 
 DEFAULT_PARTIES = [
@@ -42,6 +43,7 @@ def seed_defaults(db: Session) -> None:
                 name=sample_data["name"],
                 date=date.today().isoformat(),
                 tests=sample_data["tests"],
+                status="Waiting for S1",
             )
         )
 
@@ -100,6 +102,7 @@ def create_sample(db: Session, party_id: int, payload: SampleCreate) -> Sample:
         name=payload.name,
         tests=payload.tests,
         date=payload.date or date.today().isoformat(),
+        status="Waiting for S1",
     )
     db.add(sample)
     db.commit()
@@ -113,15 +116,18 @@ def delete_sample(db: Session, sample_id: int) -> None:
     db.commit()
 
 
+from app.services.calculation_service import calculate_analysis
+
+
 def get_analysis(db: Session, sample_id: int) -> dict:
     get_sample(db, sample_id)
     record = db.query(AnalysisRecord).filter(AnalysisRecord.sample_id == sample_id).first()
     if not record:
         return {}
-    return record.data
+    return calculate_analysis(record.data)
 
 
-def save_analysis(db: Session, sample_id: int, payload: AnalysisPayload) -> dict:
+def save_analysis(db: Session, sample_id: int, payload: AnalysisPayload, role: str | None = None) -> dict:
     get_sample(db, sample_id)
     record = db.query(AnalysisRecord).filter(AnalysisRecord.sample_id == sample_id).first()
     data = payload.model_dump(mode="json")
@@ -133,4 +139,4 @@ def save_analysis(db: Session, sample_id: int, payload: AnalysisPayload) -> dict
         db.add(record)
 
     db.commit()
-    return data
+    return calculate_analysis(data)
