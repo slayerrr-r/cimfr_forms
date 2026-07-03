@@ -1,5 +1,9 @@
+import os
+from dotenv import load_dotenv
 from pathlib import Path
 
-
 BASE_DIR = Path(__file__).resolve().parents[2]
-DATABASE_URL = f"sqlite:///{BASE_DIR / 'lab_forms.db'}"
+
+load_dotenv(BASE_DIR / ".env")
+
+DATABASE_URL = os.getenv("DATABASE_URL")

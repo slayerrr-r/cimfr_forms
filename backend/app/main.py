@@ -7,7 +7,7 @@ from app.routers.health import router as health_router
 from app.routers.parties import router as parties_router
 from app.routers.samples import router as samples_router
 
-
+# Create tables and seed initial data
 Base.metadata.create_all(bind=engine)
 seed_database()
 
@@ -17,6 +17,7 @@ app = FastAPI(
     description="FastAPI backend for party, sample, and master analysis form management.",
 )
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,7 +26,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(health_router)
+# Root endpoint
+@app.get("/", tags=["Home"])
+def root():
+    return {
+        "message": "Lab Forms API is running successfully!",
+        "version": "1.0.0",
+        "documentation": "/docs",
+        "health": "/health",
+    }
+
+# Routers
+app.include_router(health_router, tags=["Health"])
 app.include_router(parties_router, prefix="/parties", tags=["Parties"])
 app.include_router(samples_router, tags=["Samples"])
 app.include_router(analysis_router, tags=["Analysis"])

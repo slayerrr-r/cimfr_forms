@@ -51,6 +51,168 @@ function deepMerge(target, source) {
   return result;
 }
 
+function parseNumber(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const normalized = trimmed.endsWith("%") ? trimmed.slice(0, -1).trim() : trimmed;
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function formatNumber(value, precision = 4) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "";
+  const formatted = Number(value).toFixed(precision).replace(/0+$/, "").replace(/\.$/, "");
+  return formatted === "-0" ? "0" : formatted;
+}
+
+function ratioFor60Rh(m60rh, mad) {
+  if (m60rh === null || mad === null) return null;
+  const denominator = 100 - mad;
+  if (denominator === 0) return null;
+  return (100 - m60rh) / denominator;
+}
+
+function calculateProximateBasisValues(payload) {
+  const adb = payload?.adb || {};
+  const rh60 = payload?.rh60 || {};
+
+  const mAd = parseNumber(adb.moisture);
+  const m60Rh = parseNumber(rh60.moisture);
+  const ashAd = parseNumber(adb.ash);
+  const vmAd = parseNumber(adb.vm);
+  const gcvAd = parseNumber(adb.gcv);
+
+  const ratio60Rh = ratioFor60Rh(m60Rh, mAd);
+  const ash60Rh = ashAd !== null && ratio60Rh !== null ? ashAd * ratio60Rh : null;
+  const vm60Rh = vmAd !== null && ratio60Rh !== null ? vmAd * ratio60Rh : null;
+  const gcv60Rh = gcvAd !== null && ratio60Rh !== null ? gcvAd * ratio60Rh : null;
+
+  let fc60Rh = null;
+  if (m60Rh !== null && ash60Rh !== null && vm60Rh !== null) {
+    fc60Rh = 100 - (m60Rh + ash60Rh + vm60Rh);
+  }
+
+  let conversionDenom = null;
+  if (m60Rh !== null && ash60Rh !== null) {
+    conversionDenom = 100 - (m60Rh + 1.1 * ash60Rh);
+  }
+
+  let vmDmf = null;
+  let gcvDmf = null;
+  if (vmAd !== null && conversionDenom !== null && conversionDenom !== 0) {
+    vmDmf = (vmAd * 100) / conversionDenom;
+  }
+  if (gcv60Rh !== null && conversionDenom !== null && conversionDenom !== 0) {
+    gcvDmf = (gcv60Rh * 100) / conversionDenom;
+  }
+
+  const fcDmf = vmDmf !== null ? 100 - vmDmf : null;
+
+  return {
+    adb: {
+      moisture: formatNumber(mAd),
+      ash: formatNumber(ashAd),
+      vm: formatNumber(vmAd),
+      fc: formatNumber(parseNumber(adb.fc)),
+      gcv: formatNumber(gcvAd),
+    },
+    rh60: {
+      moisture: formatNumber(m60Rh),
+      ash: formatNumber(ash60Rh),
+      vm: formatNumber(vm60Rh),
+      fc: formatNumber(fc60Rh),
+      gcv: formatNumber(gcv60Rh),
+    },
+    dmf: {
+      moisture: "",
+      ash: "",
+      vm: formatNumber(vmDmf),
+      fc: formatNumber(fcDmf),
+      gcv: formatNumber(gcvDmf),
+    },
+  };
+}
+
+function calculateUltimateBasisValues(payload, proximateValues) {
+  const adb = payload?.adb || {};
+
+  const m60Rh = parseNumber(proximateValues?.rh60?.moisture);
+  const ash60Rh = parseNumber(proximateValues?.rh60?.ash);
+
+  const cAd = parseNumber(adb.c);
+  const hAd = parseNumber(adb.h);
+  const nAd = parseNumber(adb.n);
+  const sAd = parseNumber(adb.s);
+  const oAd = parseNumber(adb.o);
+
+  const ratio60Rh = ratioFor60Rh(m60Rh, parseNumber(proximateValues?.adb?.moisture));
+  const c60Rh = cAd !== null && ratio60Rh !== null ? cAd * ratio60Rh : null;
+  const h60Rh = hAd !== null && ratio60Rh !== null ? hAd * ratio60Rh : null;
+  const n60Rh = nAd !== null && ratio60Rh !== null ? nAd * ratio60Rh : null;
+  const s60Rh = sAd !== null && ratio60Rh !== null ? sAd * ratio60Rh : null;
+
+  let o60Rh = null;
+  if (c60Rh !== null && h60Rh !== null && n60Rh !== null && m60Rh !== null && ash60Rh !== null) {
+    o60Rh = 100 - (c60Rh + h60Rh + n60Rh + m60Rh + 1.1 * ash60Rh);
+  }
+
+  let conversionDenom = null;
+  if (m60Rh !== null && ash60Rh !== null) {
+    conversionDenom = 100 - (m60Rh + 1.1 * ash60Rh);
+  }
+
+  let cDmf = null;
+  let hDmf = null;
+  let nDmf = null;
+  if (conversionDenom !== null && conversionDenom !== 0) {
+    if (cAd !== null) cDmf = (cAd * 100) / conversionDenom;
+    if (hAd !== null) hDmf = (hAd * 100) / conversionDenom;
+    if (nAd !== null) nDmf = (nAd * 100) / conversionDenom;
+  }
+
+  return {
+    adb: {
+      c: formatNumber(cAd),
+      h: formatNumber(hAd),
+      n: formatNumber(nAd),
+      s: formatNumber(sAd),
+      o: formatNumber(oAd),
+    },
+    rh60: {
+      c: formatNumber(c60Rh),
+      h: formatNumber(h60Rh),
+      n: formatNumber(n60Rh),
+      s: formatNumber(s60Rh),
+      o: formatNumber(o60Rh),
+    },
+    dmf: {
+      c: formatNumber(cDmf),
+      h: formatNumber(hDmf),
+      n: formatNumber(nDmf),
+      s: "",
+      o: "",
+    },
+  };
+}
+
+function calculateAnalysis(data) {
+  const proximate = data?.proximate || {};
+  const ultimate = data?.ultimate || {};
+  const calculatedProximate = calculateProximateBasisValues(proximate);
+  const calculatedUltimate = calculateUltimateBasisValues(ultimate, calculatedProximate);
+
+  return {
+    ...data,
+    proximate: calculatedProximate,
+    ultimate: calculatedUltimate,
+  };
+}
+
 export default function MasterForm() {
 
   const { partyId, sampleId } = useParams();
@@ -71,6 +233,13 @@ export default function MasterForm() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const updateSampleData = (updater) => {
+    setSampleData((prev) => {
+      const nextData = typeof updater === "function" ? updater(prev) : updater;
+      return calculateAnalysis(nextData);
+    });
+  };
+
   const fetchFormDetails = async () => {
     try {
       setLoading(true);
@@ -86,7 +255,7 @@ export default function MasterForm() {
 
       // Fetch analysis record
       const analysisData = await api.getAnalysis(sampleId);
-      setSampleData(deepMerge(DEFAULT_TEMPLATE, analysisData || {}));
+      setSampleData(calculateAnalysis(deepMerge(DEFAULT_TEMPLATE, analysisData || {})));
     } catch (err) {
       setError(err.message || "Failed to load form details");
     } finally {
@@ -100,7 +269,10 @@ export default function MasterForm() {
 
   const saveForm = async () => {
     try {
-      await api.saveAnalysis(sampleId, sampleData, role);
+      const response = await api.saveAnalysis(sampleId, sampleData, role);
+      if (response?.analysis) {
+        setSampleData(calculateAnalysis(deepMerge(DEFAULT_TEMPLATE, response.analysis)));
+      }
       alert("Form saved successfully");
     } catch (err) {
       alert(err.message || "Failed to save analysis form");
@@ -395,7 +567,7 @@ export default function MasterForm() {
 
                 <ProximateSection
                   data={sampleData}
-                  setData={setSampleData}
+                  setData={updateSampleData}
                   editable={canEditProximate}
                 />
 
@@ -416,7 +588,7 @@ export default function MasterForm() {
 
                 <UltimateSection
                   data={sampleData}
-                  setData={setSampleData}
+                  setData={updateSampleData}
                   editable={canEditUltimate}
                 />
 
@@ -437,7 +609,7 @@ export default function MasterForm() {
 
                 <SpecialTestsSection
                   data={sampleData}
-                  setData={setSampleData}
+                  setData={updateSampleData}
                   editable={canEditSpecial}
                 />
 
@@ -458,7 +630,7 @@ export default function MasterForm() {
 
                 <SulphurSection
                   data={sampleData}
-                  setData={setSampleData}
+                  setData={updateSampleData}
                   editable={canEditSulphur}
                 />
 

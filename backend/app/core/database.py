@@ -1,16 +1,25 @@
 from datetime import datetime
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.core.config import DATABASE_URL
 
 
+# Create database engine
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False},
+    pool_pre_ping=True
 )
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Session
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+
+# Base class for models
 Base = declarative_base()
 
 
@@ -27,14 +36,21 @@ def utc_now():
 
 
 def seed_database():
+    """
+    Seed default values into the database.
+    This works for both PostgreSQL and SQLite.
+    """
     from app.services.repository import seed_defaults
 
     db = SessionLocal()
+
     try:
-        if engine.dialect.name == "sqlite":
-            db.execute(text("ALTER TABLE samples ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'Waiting for S1'"))
         seed_defaults(db)
+        db.commit()
+
     except Exception:
         db.rollback()
+        raise
+
     finally:
         db.close()
